@@ -2,8 +2,9 @@ import cv2
 import mediapipe as mp
 import numpy as np
 import struct
-import logging
 from multiprocessing import shared_memory, Process, Pipe
+
+SHOW_INDEX = True
 
 BUFFER_SIZE = 1
 
@@ -141,10 +142,12 @@ def displayLoop(mp_conn):
     mp_conn.recv()
     while True:
         frame_from_mem, idx_from_mem = mp_disp_mem.getFrame(index)
+        if SHOW_INDEX:
+            index_text = f"{idx_from_mem}"
+            cv2.putText(frame_from_mem, index_text, (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
         cv2.imshow("MediaPipe Landmarks", frame_from_mem)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
-        print(f"idx in: {index}, idx out: {idx_from_mem} ")
         index += 1
         mp_conn.recv()
 
